@@ -21,7 +21,7 @@ def load_config(filename):
 
 def dump_config(config, filename):
     if isinstance(config, ConfigDict):
-        config = config._to_vanilla()
+        config = config.to_vanilla_()
     print('Writing config to {}'.format(filename))
     with open(filename, 'w') as fout:
         json.dump(config, fout, indent=2)
@@ -83,11 +83,14 @@ class ConfigDict(object):
         for key in self._data:
             yield key
 
-    def _to_vanilla(self):
+    def get_(self, key, value=None):
+        return self._data.get(key, value)
+
+    def to_vanilla_(self):
         data = {}
         for key, value in self._data.items():
             if isinstance(value, (ConfigDict, ConfigList)):
-                value = value._to_vanilla()
+                value = value.to_vanilla_()
             data[key] = value
         return data
 
@@ -111,10 +114,10 @@ class ConfigList(object):
         for value in self._data:
             yield value
 
-    def _to_vanilla(self):
+    def to_vanilla_(self):
         data = []
         for value in self._data:
             if isinstance(value, (ConfigDict, ConfigList)):
-                value = value._to_vanilla()
+                value = value.to_vanilla_()
             data.append(value)
         return data

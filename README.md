@@ -5,12 +5,13 @@ Basic pytorch pipeline for running experiments.
 To use:
 
 - Copy this whole thing to a new project.
-- Change `yournamehere` to some awesome name (say dogswithhorns).
+- Change `yournamehere` to some awesome name (say `dogswithhorns`).
 - Run
   ```
-  sed -i 's/yournamehere/dogwithhorns/g' *.py */*.py */*/*.py
+  sed -i 's/yournamehere/dogswithhorns/g' *.py */*.py */*/*.py
   ```
 - Test with
   ```
-  ./main.py configs/base.yml
+  mkdir out
+  ./main.py train configs/base.yml configs/data/demo.yml configs/model/demo.yml
   ```

@@ -2,9 +2,13 @@
 # Constants
 
 PAD = '<PAD>'
+PAD_INDEX = 0
 UNK = '<UNK>'
-SOS = '<SOS>'
+UNK_INDEX = 1
+BOS = '<BOS>'
+BOS_INDEX = 2
 EOS = '<EOS>'
+EOS_INDEX = 3
 
 
 ################################
