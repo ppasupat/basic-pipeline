@@ -1,0 +1,7 @@
+# Smaller timing configs for debugging
+
+timing:
+  max_epochs: 2
+
+train:
+  batch_size: 5
