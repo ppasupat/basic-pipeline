@@ -28,7 +28,8 @@ class DemoModel(Model):
         # input: (batch, seq_len, embed_dim)
         # output: (hiddens, (h_n, c_n))
         # hiddens: (batch, seq_len, 2 * lstm_dim)
-        # h_n and c_n: (batch, lstm_layers * 2, lstm_dim)
+        # h_n and c_n: (lstm_layers * 2, batch, lstm_dim)
+        #       [batch is at index 1 even when batch_first=True!]
         self.lstm = nn.LSTM(
             c_model.embed_dim,
             c_model.lstm_dim,
@@ -92,7 +93,7 @@ class DemoModel(Model):
         embedded_tokens = self.token_embedder(padded_token_indices)
 
         # hiddens: (batch, padded_seq_len, hiddens_dim)
-        # h_n and c_n: (batch, *, *)
+        # h_n and c_n: (lstm_layers * 2, batch, lstm_dim)
         seq_lengths = try_gpu(torch.tensor([x.length for x in batch]))
         packed_embedded_tokens = pack_padded_sequence(
             embedded_tokens, seq_lengths + 2, batch_first=True,
@@ -102,7 +103,8 @@ class DemoModel(Model):
 
         # lstm_out: (batch, lstm_out_dim)
         lstm_out = torch.cat([
-            h_n.reshape(len(batch), -1), c_n.reshape(len(batch), -1),
+            h_n.transpose(0, 1).reshape(len(batch), -1),
+            c_n.transpose(0, 1).reshape(len(batch), -1),
         ], dim=1)
 
         return embedded_tokens, hiddens, lstm_out

@@ -1,6 +1,3 @@
-train:
-  batch_size: 1
-
 model:
   name: demo
   embed_dim: 100
