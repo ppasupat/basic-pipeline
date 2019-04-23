@@ -1,7 +1,5 @@
 # Basic Pipeline
 
-**WARNING: WORK IN PROGRESS**
-
 Basic pytorch pipeline for running experiments.
 
 Part of this is inspired by [PyText](https://github.com/facebookresearch/pytext)
@@ -31,6 +29,9 @@ I just want a ...er... plastic case that I can put my favorite blades in.
   ```
   mkdir out
   ./main.py train configs/base.yml configs/data/demo.yml configs/model/demo.yml
+  # Change 0.exec below to the output directory of the train command
+  # Change 30 to the epoch number you want
+  ./main.py test out/0.exec/config.json -l out/0.exec/30
   ```
 
 # Implementing stuff
