@@ -36,5 +36,8 @@ class Model(nn.Module):
             batch: list[Example]
         Returns:
             predictions to be read by dataset.evaluate
+
+            Note that you can look at the correct answer in `batch`,
+            which is useful for an oracle model.
         """
         raise NotImplementedError

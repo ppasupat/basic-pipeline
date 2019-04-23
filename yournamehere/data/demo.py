@@ -1,10 +1,15 @@
 from collections import Counter
 
+import numpy as np
+
 from yournamehere.data.base import Dataset
 from yournamehere.utils import batch_iter, PAD, UNK, UNK_INDEX, BOS, EOS
 
 
 class DemoExample(object):
+    """
+    A simple text classification example.
+    """
     
     def __init__(self, index, sentence, label):
         self.index = index
@@ -40,6 +45,9 @@ class DemoExample(object):
 
 
 class DemoDataset(Dataset):
+    """
+    A simple text classification dataset.
+    """
 
     def __init__(self, config, meta):
         super().__init__(config, meta)
@@ -52,6 +60,8 @@ class DemoDataset(Dataset):
             for example in self._data[name]:
                 example.preprocess(config)
         if not hasattr(meta, 'vocab'):
+            # Note: meta.vocab is already there if the model was loaded
+            #   from a snapshot.
             self._gen_vocab(self._data['train'], config, meta)
         for name in self._data:
             for example in self._data[name]:
@@ -113,8 +123,10 @@ class DemoDataset(Dataset):
         Args:
             batch: list[Example]
             prediction: Tuple[Tensor, Tensor]
-                First Tensor: predicted label indices.
-                Second Tensor: prediction scores.
+                First Tensor: (batch,)
+                    predicted label indices.
+                Second Tensor: (batch, num_labels)
+                    prediction score for each label.
             stats: Stats
         """
         pred_label_indices, pred_scores = prediction
@@ -123,7 +135,8 @@ class DemoDataset(Dataset):
             key=lambda x: x[0].index
         )
         for example, pred_label_index, pred_score in ordered:
+            pred_label_index = pred_label_index.item()
             if fout:
                 print(pred_label_index, file=fout)
-            if str(example.tree) == str(pred_tree):
+            if example.label_index == pred_label_index:
                 stats.accuracy += 1
