@@ -22,11 +22,11 @@ I just want a ...er... plastic case that I can put my favorite blades in.
 - Copy this whole thing to a new project.
 - Change `yournamehere` to some awesome name (say `dogswithhorns`).
 - Run
-  ```
+  ```bash
   sed -i 's/yournamehere/dogswithhorns/g' *.py */*.py */*/*.py
   ```
 - Test with
-  ```
+  ```bash
   mkdir out
   ./main.py train configs/base.yml configs/data/demo.yml configs/model/demo.yml
   # Change 0.exec below to the output directory of the train command
