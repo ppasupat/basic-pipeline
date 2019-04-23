@@ -9,8 +9,8 @@ I just want a ...er... plastic case that I can put my favorite blades in.
 
 # Dependencies
 
-* Python 
-* [Pytorch](https://pytorch.org/)
+* Python 3.x
+* [Pytorch 1.0](https://pytorch.org/)
 * [tqdm](https://pypi.org/project/tqdm/)
 * (optional) [PyYAML](https://pypi.org/project/PyYAML/)
   * If not installed, only JSON configs can be used.
