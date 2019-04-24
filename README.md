@@ -1,11 +1,11 @@
-# Basic Pipeline
+# Plastic Case
 
 Basic pytorch pipeline for running experiments.
 
 Part of this is inspired by [PyText](https://github.com/facebookresearch/pytext)
 and Kelvin Guu's [gtd](https://github.com/kelvinguu/lang2program/tree/master/third-party/gtd).
 But instead of a pre-made Swiss Army knife,
-I just want a ...er... plastic case that I can put my favorite blades in.
+I just want a plain plastic case that I can put my favorite blades in.
 
 # Dependencies
 
