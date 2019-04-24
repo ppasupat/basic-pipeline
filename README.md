@@ -40,3 +40,7 @@ To implement custom data handler and model, just do what the demo ones do:
 
 - Add a new dataset class in `data/` and add the initializer to `data/__init__.py`
 - Add a new model class in `model/` and add the initializer to `model/__init__.py`
+
+# License
+
+None. Just copy the things you need and modify them.
