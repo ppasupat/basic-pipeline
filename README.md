@@ -2,10 +2,10 @@
 
 Basic pytorch pipeline for running experiments.
 
-Part of this is inspired by [PyText](https://github.com/facebookresearch/pytext)
+Part of this was inspired by [PyText](https://github.com/facebookresearch/pytext)
 and Kelvin Guu's [gtd](https://github.com/kelvinguu/lang2program/tree/master/third-party/gtd).
 But instead of a pre-made Swiss Army knife,
-I just want a plain plastic case that I can put my favorite blades in.
+I just want a plain plastic case that I can put my favorite blades into.
 
 # Dependencies
 
@@ -40,6 +40,9 @@ To implement custom data handler and model, just do what the demo ones do:
 
 - Add a new dataset class in `data/` and add the initializer to `data/__init__.py`
 - Add a new model class in `model/` and add the initializer to `model/__init__.py`
+
+Right now the configs are specified by YAML or JSON with no schema whatsoever.
+Feel free to replace it with the config framework of your choice.
 
 # License
 
