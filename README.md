@@ -30,19 +30,19 @@ I just want a plain plastic case that I can put my favorite blades into.
   mkdir out
   ./main.py train configs/base.yml configs/data/demo.yml configs/model/demo.yml
   # Change 0.exec below to the output directory of the train command
-  # Change 30 to the epoch number you want
+  #   and change 30 below to the epoch number you want
   ./main.py test out/0.exec/config.json -l out/0.exec/30
   ```
 
 # Implementing stuff
 
-To implement custom data handler and model, just do what the demo ones do:
+To implement your own data handler and model, just imitate the demo ones:
 
-- Add a new dataset class in `data/` and add the initializer to `data/__init__.py`
-- Add a new model class in `model/` and add the initializer to `model/__init__.py`
+- Add a new dataset class in `data/` and add an initializer to `data/__init__.py`
+- Add a new model class in `model/` and add an initializer to `model/__init__.py`
 
 Right now the configs are specified by YAML or JSON with no schema whatsoever.
-Feel free to replace it with the config framework of your choice.
+Feel free to replace it with a config framework of your choice.
 
 # License
 
