@@ -24,6 +24,7 @@ class DemoModel(Model):
             len(meta.vocab),
             c_model.embed_dim,
         )
+        self.dropout = nn.Dropout(c_model.dropout)
 
         # input: (batch, seq_len, embed_dim)
         # output: (hiddens, (h_n, c_n))
@@ -44,6 +45,7 @@ class DemoModel(Model):
         # input: (batch, lstm_out_dim)
         # output: (batch, num_labels)
         self.mlp = nn.Sequential(
+            self.dropout,
             nn.Linear(self.lstm_out_dim, c_model.mlp_hidden_dim),
             nn.ReLU(),
             nn.Linear(c_model.mlp_hidden_dim, len(meta.labels)),
@@ -91,6 +93,7 @@ class DemoModel(Model):
 
         # embedded_tokens: (batch, padded_seq_len, embed_dim)
         embedded_tokens = self.token_embedder(padded_token_indices)
+        embedded_tokens = self.dropout(embedded_tokens)
 
         # hiddens: (batch, padded_seq_len, hiddens_dim)
         # h_n and c_n: (lstm_layers * 2, batch, lstm_dim)
