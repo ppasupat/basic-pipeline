@@ -17,7 +17,7 @@ I just want a plain plastic case that I can put my favorite blades into.
 * (optional) [tensorboardX](https://pypi.org/project/tensorboardX/)
   * If not installed, stats will dumped to stdout instead.
 * (optional) [bottle](https://bottlepy.org/)
-  * Used for running a HTTP prediction server
+  * Used for running an HTTP prediction server
 
 # Usage
 
@@ -44,7 +44,8 @@ I just want a plain plastic case that I can put my favorite blades into.
   #   and change 500 below to the step number you want
   ./main.py test out/0.exec/config.json configs/data/demo-test.yml -l out/0.exec/500
   ```
-  It should get ~ 100% accuracy.
+  It should get ~ 100% accuracy. The predictions are dumped to `out/___.exec/pred.test.500`
+  (where `___.exec` is the last exec directory in `out`).
 
 - Server:
   ```bash
@@ -52,7 +53,7 @@ I just want a plain plastic case that I can put my favorite blades into.
   ```
   Then issue a POST request like this:
   ```bash
-  curl -X POST -H 'Content-Type: application/x-www-form-urlencoded' -d "sentence=i love ice cream" http://localhost:8080/pred
+  curl -X POST -H 'Content-Type: application/x-www-form-urlencoded' -d "sentence=i not hate you" http://localhost:8080/pred
   ```
   The result should contain `"label": "POSITIVE"`.
 
