@@ -14,7 +14,7 @@ from yournamehere.utils import Stats, try_gpu
 
 class Experiment(object):
 
-    def __init__(self, config, outputter, load_prefix=None, seed=None):
+    def __init__(self, config, outputter, load_prefix=None, seed=None, force_cpu=False):
         self.config = config
         if seed is not None:
             random.seed(seed)
@@ -28,7 +28,7 @@ class Experiment(object):
         self.dataset = create_dataset(self.config, self.meta)
         self.create_model()
         if load_prefix:
-            self.load_model(load_prefix)
+            self.load_model(load_prefix, force_cpu=force_cpu)
         else:
             self.model.initialize(self.config, self.meta)
 
@@ -47,9 +47,12 @@ class Experiment(object):
         print('Loading metadata from {}.meta'.format(prefix))
         self.meta.load(prefix + '.meta')
 
-    def load_model(self, prefix):
+    def load_model(self, prefix, force_cpu=False):
         print('Loading model from {}.model'.format(prefix))
-        state_dict = torch.load(prefix + '.model')
+        if force_cpu:
+            state_dict = torch.load(prefix + '.model', map_location='cpu')
+        else:
+            state_dict = torch.load(prefix + '.model')
         self.model.load_state_dict(state_dict)
 
     ################################
@@ -57,54 +60,65 @@ class Experiment(object):
 
     def train(self):
         config = self.config
-        train_stats = Stats()
 
         # Initial save
-        self.outputter.save_model(self.meta.epoch, self.model, self.meta)
+        self.outputter.save_model(self.meta.step, self.model, self.meta)
 
-        max_epochs = config.timing.max_epochs
-        progress_bar = tqdm(total=max_epochs, desc='TRAIN')
+        max_steps = config.timing.max_steps
+        progress_bar = tqdm(total=max_steps, desc='TRAIN')
+        progress_bar.update(self.meta.step)
 
-        while self.meta.epoch < max_epochs:
-            self.meta.epoch += 1
+        train_iter = None
+        train_stats = Stats()
+
+        while self.meta.step < max_steps:
+            self.meta.step += 1
             progress_bar.update()
             
-            self.dataset.init_iter('train')
-            for train_batch in tqdm(self.dataset.get_iter('train'), desc='TRAIN'):
-                stats = self.process_batch(train_batch, train=True)
-                train_stats.add(stats)
-            print('TRAIN @ {}: {}'.format(self.meta.epoch, train_stats))
-            train_stats.log(self.outputter.tb_logger, self.meta.epoch, 'pn_train_')
-            train_stats = Stats()
+            train_batch = None if train_iter is None else next(train_iter, None)
+            if train_batch is None:
+                self.dataset.init_iter('train')
+                train_iter = self.dataset.get_iter('train')
+                train_batch = next(train_iter)
+                assert train_batch is not None, 'No training data'
+
+            stats = self.process_batch(train_batch, train=True)
+            train_stats.add(stats)
+
+            # Log the aggregate statistics
+            if self.meta.step % config.timing.log_freq == 0:
+                print('TRAIN @ {}: {}'.format(self.meta.step, train_stats))
+                train_stats.log(self.outputter.tb_logger, self.meta.step, 'pn_train_')
+                train_stats = Stats()
 
             # Save the model
-            self.outputter.save_model(self.meta.epoch, self.model, self.meta)
+            if self.meta.step % config.timing.save_freq == 0:
+                self.outputter.save_model(self.meta.step, self.model, self.meta)
 
             # Evaluate
-            dev_stats = Stats()
-            self.dataset.init_iter('dev')
-            fout_filename = 'pred.dev.{}'.format(self.meta.epoch)
-            with open(self.outputter.get_path(fout_filename), 'w') as fout:
-                for dev_batch in tqdm(self.dataset.get_iter('dev'), desc='DEV'):
-                    stats = self.process_batch(dev_batch, train=False, fout=fout)
-                    dev_stats.add(stats)
-            print('DEV @ {}: {}'.format(self.meta.epoch, dev_stats))
-            dev_stats.log(self.outputter.tb_logger, self.meta.epoch, 'pn_dev_')
-            self.meta.update_acc(dev_stats.accuracy / dev_stats.n)
+            if self.meta.step % config.timing.eval_freq == 0:
+                dev_stats = Stats()
+                self.dataset.init_iter('dev')
+                fout_filename = 'pred.dev.{}'.format(self.meta.step)
+                with open(self.outputter.get_path(fout_filename), 'w') as fout:
+                    for dev_batch in tqdm(self.dataset.get_iter('dev'), desc='DEV'):
+                        stats = self.process_batch(dev_batch, train=False, fout=fout)
+                        dev_stats.add(stats)
+                print('DEV @ {}: {}'.format(self.meta.step, dev_stats))
+                dev_stats.log(self.outputter.tb_logger, self.meta.step, 'pn_dev_')
 
         progress_bar.close()
 
     def test(self):
         test_stats = Stats()
         self.dataset.init_iter('test')
-        fout_filename = 'pred.test.{}'.format(self.meta.epoch)
+        fout_filename = 'pred.test.{}'.format(self.meta.step)
         with open(self.outputter.get_path(fout_filename), 'w') as fout:
             for test_batch in tqdm(self.dataset.get_iter('test'), desc='TEST'):
                 stats = self.process_batch(test_batch, train=False, fout=fout)
                 test_stats.add(stats)
-        print('TEST @ {}: {}'.format(self.meta.epoch, test_stats))
-        test_stats.log(self.outputter.tb_logger, self.meta.epoch, 'pn_test_')
-
+        print('TEST @ {}: {}'.format(self.meta.step, test_stats))
+        test_stats.log(self.outputter.tb_logger, self.meta.step, 'pn_test_')
 
     ################################
     # Processing a batch
@@ -134,8 +148,8 @@ class Experiment(object):
         stats.n = len(batch)
         stats.loss = float(mean_loss)
         # Evaluate
-        predictions = self.model.get_pred(logit, batch)
-        self.dataset.evaluate(batch, predictions, stats, fout)
+        prediction = self.model.get_pred(logit, batch)
+        self.dataset.evaluate(batch, logit, prediction, stats, fout)
         # Gradient
         if train and mean_loss.requires_grad:
             mean_loss.backward()
@@ -145,3 +159,11 @@ class Experiment(object):
             )
             self.optimizer.step()
         return stats
+
+    ################################
+    # Server mode
+
+    def serve(self, port):
+        from yournamehere.server import start_server
+        self.model.eval()
+        start_server(self, port)

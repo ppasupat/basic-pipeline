@@ -33,9 +33,13 @@ def main():
             help='Additional config (as JSON)')
     parser.add_argument('-o', '--outdir',
             help='Force the output directory')
-    parser.add_argument('-s', '--seed', type=int,
+    parser.add_argument('-s', '--seed', type=int, default=42,
             help='Set seed')
-    parser.add_argument('action', choices=['train', 'test'])
+    parser.add_argument('-p', '--port', type=int, default=8080,
+            help='Port for the "server" action')
+    parser.add_argument('-C', '--force-cpu', action='store_true',
+            help='Load a GPU-trained model on CPU')
+    parser.add_argument('action', choices=['train', 'test', 'server'])
     parser.add_argument('configs', nargs='+',
             help='Config JSON or YAML files')
     args = parser.parse_args()
@@ -53,12 +57,16 @@ def main():
     config = ConfigDict(config)
 
     outputter = Outputter(config, basedir=BASEDIR, force_outdir=args.outdir)
-    experiment = Experiment(config, outputter, args.load_prefix, args.seed)
+    experiment = Experiment(
+        config, outputter, args.load_prefix, args.seed, args.force_cpu
+    )
 
     if args.action == 'train':
         experiment.train()
     elif args.action == 'test':
         experiment.test()
+    elif args.action == 'server':
+        experiment.serve(args.port)
     else:
         raise ValueError('Unknown action: {}'.format(args.action))
     

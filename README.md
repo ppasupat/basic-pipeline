@@ -16,6 +16,8 @@ I just want a plain plastic case that I can put my favorite blades into.
   * If not installed, only JSON configs can be used.
 * (optional) [tensorboardX](https://pypi.org/project/tensorboardX/)
   * If not installed, stats will dumped to stdout instead.
+* (optional) [bottle](https://bottlepy.org/)
+  * Used for running a HTTP prediction server
 
 # Usage
 
@@ -25,13 +27,20 @@ I just want a plain plastic case that I can put my favorite blades into.
   ```bash
   sed -i 's/yournamehere/dogswithhorns/g' *.py */*.py */*/*.py
   ```
-- Test with
+- Training:
   ```bash
   mkdir out
-  ./main.py train configs/base.yml configs/data/demo.yml configs/model/demo.yml
+  ./main.py train configs/base.yml configs/data/demo.yml configs/model/demo.yml configs/debug.yml
+  ```
+- Test:
+  ```bash
   # Change 0.exec below to the output directory of the train command
-  #   and change 30 below to the epoch number you want
-  ./main.py test out/0.exec/config.json -l out/0.exec/30
+  #   and change 500 below to the step number you want
+  ./main.py test out/0.exec/config.json -l out/0.exec/500
+  ```
+- Server:
+  ```bash
+  ./main.py server out/0.exec/config.json -l out/0.exec/500
   ```
 
 # Implementing stuff
