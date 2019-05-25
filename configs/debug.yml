@@ -1,7 +1,10 @@
 # Smaller timing configs for debugging
 
 timing:
-  max_epochs: 2
+  max_steps: 500
+  log_freq: 20
+  save_freq: 20
+  eval_freq: 20
 
 train:
   batch_size: 5

@@ -16,23 +16,46 @@ I just want a plain plastic case that I can put my favorite blades into.
   * If not installed, only JSON configs can be used.
 * (optional) [tensorboardX](https://pypi.org/project/tensorboardX/)
   * If not installed, stats will dumped to stdout instead.
+* (optional) [bottle](https://bottlepy.org/)
+  * Used for running an HTTP prediction server
 
 # Usage
 
 - Copy this whole thing to a new project.
+
 - Change `yournamehere` to some awesome name (say `dogswithhorns`).
+
 - Run
   ```bash
   sed -i 's/yournamehere/dogswithhorns/g' *.py */*.py */*/*.py
   ```
-- Test with
+
+- Training:
   ```bash
   mkdir out
-  ./main.py train configs/base.yml configs/data/demo.yml configs/model/demo.yml
-  # Change 0.exec below to the output directory of the train command
-  #   and change 30 below to the epoch number you want
-  ./main.py test out/0.exec/config.json -l out/0.exec/30
+  # See configs.py for how the config file merging works.
+  ./main.py train configs/base.yml configs/data/demo-train.yml configs/model/demo.yml configs/debug.yml
   ```
+  It should get ~ 100% accuracy.
+
+- Test:
+  ```bash
+  # Change 0.exec below to the output directory of the train command
+  #   and change 500 below to the step number you want
+  ./main.py test out/0.exec/config.json configs/data/demo-test.yml -l out/0.exec/500
+  ```
+  It should get ~ 100% accuracy. The predictions are dumped to `out/___.exec/pred.test.500`
+  (where `___.exec` is the last exec directory in `out`).
+
+- Server:
+  ```bash
+  ./main.py server out/0.exec/config.json -l out/0.exec/500 -p 8080
+  ```
+  Then issue a POST request like this:
+  ```bash
+  curl -X POST -H 'Content-Type: application/x-www-form-urlencoded' -d "sentence=i not hate you" http://localhost:8080/pred
+  ```
+  The result should contain `"label": "POSITIVE"`.
 
 # Implementing stuff
 
