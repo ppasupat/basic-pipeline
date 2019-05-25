@@ -11,10 +11,10 @@ class DemoExample(object):
     A simple text classification example.
     """
     
-    def __init__(self, index, sentence, label):
-        self.index = index
+    def __init__(self, sentence, label=None, ex_index=None):
         self.sentence = sentence
-        self.label = label or None
+        self.label = label
+        self.ex_index = ex_index
 
     def preprocess(self, config):
         """
@@ -48,11 +48,13 @@ class DemoDataset(Dataset):
     """
     A simple text classification dataset.
     """
+    META_KEYS = ['vocab', 'vocab_x', 'labels', 'labels_x']
 
     def __init__(self, config, meta):
         super().__init__(config, meta)
         self._data = {}
         self._iters = {}
+        self.meta = meta
         for name in config.data.files:
             self._data[name] = self._read_data(config.data.files[name])
             print('Read {} {} examples'.format(len(self._data[name]), name))
@@ -62,17 +64,19 @@ class DemoDataset(Dataset):
         if not hasattr(meta, 'vocab'):
             # Note: meta.vocab is already there if the model was loaded
             #   from a snapshot.
+            print('Initializing vocab ...')
             self._gen_vocab(self._data['train'], config, meta)
+            meta.save_keys.update(self.META_KEYS)
         for name in self._data:
             for example in self._data[name]:
-                example.postprocess(config, meta)
+                example.postprocess(config, self.meta)
 
     def _read_data(self, filename):
         examples = []
         with open(filename) as fin:
-            for index, line in enumerate(fin):
+            for ex_index, line in enumerate(fin):
                 label, sentence = line.rstrip('\n').split('\t')
-                example = DemoExample(index, sentence, label)
+                example = DemoExample(sentence, label, ex_index)
                 examples.append(example)
         return examples
 
@@ -122,6 +126,7 @@ class DemoDataset(Dataset):
 
         Args:
             batch: list[Example]
+            logit: Output from forward(batch) (unused here)
             prediction: Tuple[Tensor, Tensor]
                 First Tensor: (batch,)
                     predicted label indices.
@@ -132,7 +137,7 @@ class DemoDataset(Dataset):
         pred_label_indices, pred_scores = prediction
         ordered = sorted(
             zip(batch, pred_label_indices, pred_scores),
-            key=lambda x: x[0].index
+            key=lambda x: x[0].ex_index
         )
         for example, pred_label_index, pred_score in ordered:
             pred_label_index = pred_label_index.item()
@@ -140,3 +145,48 @@ class DemoDataset(Dataset):
                 print(pred_label_index, file=fout)
             if example.label_index == pred_label_index:
                 stats.accuracy += 1
+
+    def s_parse_request(self, q):
+        """
+        Parse the server's request.
+
+        Args:
+            q: Bottle's MultiDict
+                The POST form
+        Returns:
+            batch (list[Example])
+        """
+        print('Received "{}"'.format(q['sentence']))
+        example = DemoExample(q['sentence'])
+        example.preprocess(self.config)
+        example.postprocess(self.config, self.meta)
+        return [example]
+
+    def s_generate_response(self, q, batch, logit, prediction):
+        """
+        Convert results into server's response.
+
+        Args:
+            q: Bottle's MultiDict
+                The POST form
+            batch: list[Example]
+            logit: Output from forward(batch) (unused here)
+            prediction: Tuple[Tensor, Tensor]
+                First Tensor: (batch,)
+                    predicted label indices.
+                Second Tensor: (batch, num_labels)
+                    prediction score for each label.
+        Returns:
+            dict to be encoded as JSON.
+        """
+        pred_label_indices, pred_scores = prediction
+        pred_label_index = pred_label_indices[0].item()
+        response = {
+            'sentence': q['sentence'],
+            'prediction': pred_label_index,
+            'label': self.meta.labels[pred_label_index],
+            'score': pred_scores[0].tolist(),
+        }
+        print('Response = {}'.format(response))
+        return response
+

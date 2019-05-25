@@ -3,4 +3,3 @@ data:
   files:
     train: demo/train.tsv
     dev: demo/dev.tsv
-    test: demo/test.tsv

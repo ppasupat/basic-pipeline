@@ -22,26 +22,39 @@ I just want a plain plastic case that I can put my favorite blades into.
 # Usage
 
 - Copy this whole thing to a new project.
+
 - Change `yournamehere` to some awesome name (say `dogswithhorns`).
+
 - Run
   ```bash
   sed -i 's/yournamehere/dogswithhorns/g' *.py */*.py */*/*.py
   ```
+
 - Training:
   ```bash
   mkdir out
-  ./main.py train configs/base.yml configs/data/demo.yml configs/model/demo.yml configs/debug.yml
+  # See configs.py for how the config file merging works.
+  ./main.py train configs/base.yml configs/data/demo-train.yml configs/model/demo.yml configs/debug.yml
   ```
+  It should get ~ 100% accuracy.
+
 - Test:
   ```bash
   # Change 0.exec below to the output directory of the train command
   #   and change 500 below to the step number you want
-  ./main.py test out/0.exec/config.json -l out/0.exec/500
+  ./main.py test out/0.exec/config.json configs/data/demo-test.yml -l out/0.exec/500
   ```
+  It should get ~ 100% accuracy.
+
 - Server:
   ```bash
-  ./main.py server out/0.exec/config.json -l out/0.exec/500
+  ./main.py server out/0.exec/config.json -l out/0.exec/500 -p 8080
   ```
+  Then issue a POST request like this:
+  ```bash
+  curl -X POST -H 'Content-Type: application/x-www-form-urlencoded' -d "sentence=i love ice cream" http://localhost:8080/pred
+  ```
+  The result should contain `"label": "POSITIVE"`.
 
 # Implementing stuff
 
