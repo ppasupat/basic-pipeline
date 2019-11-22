@@ -11,7 +11,6 @@ I just want a plain plastic case that I can put my favorite blades into.
 
 * Python 3.x
 * [Pytorch 1.0](https://pytorch.org/)
-* [tqdm](https://pypi.org/project/tqdm/)
 * (optional) [PyYAML](https://pypi.org/project/PyYAML/)
   * If not installed, only JSON configs can be used.
 * (optional) [tensorboardX](https://pypi.org/project/tensorboardX/)
@@ -32,7 +31,6 @@ I just want a plain plastic case that I can put my favorite blades into.
 
 - Training:
   ```bash
-  mkdir out
   # See configs.py for how the config file merging works.
   ./main.py train configs/base.yml configs/data/demo-train.yml configs/model/demo.yml configs/debug.yml
   ```

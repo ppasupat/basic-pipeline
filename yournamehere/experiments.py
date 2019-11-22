@@ -4,7 +4,6 @@ import numpy as np
 import torch
 from torch.nn.utils import clip_grad_norm_
 import torch.optim as optim
-from tqdm import tqdm
 
 from yournamehere.data import create_dataset
 from yournamehere.metadata import Metadata
@@ -65,15 +64,12 @@ class Experiment(object):
         self.outputter.save_model(self.meta.step, self.model, self.meta)
 
         max_steps = config.timing.max_steps
-        progress_bar = tqdm(total=max_steps, desc='TRAIN')
-        progress_bar.update(self.meta.step)
 
         train_iter = None
         train_stats = Stats()
 
         while self.meta.step < max_steps:
             self.meta.step += 1
-            progress_bar.update()
             
             train_batch = None if train_iter is None else next(train_iter, None)
             if train_batch is None:
@@ -101,20 +97,18 @@ class Experiment(object):
                 self.dataset.init_iter('dev')
                 fout_filename = 'pred.dev.{}'.format(self.meta.step)
                 with open(self.outputter.get_path(fout_filename), 'w') as fout:
-                    for dev_batch in tqdm(self.dataset.get_iter('dev'), desc='DEV'):
+                    for dev_batch in self.dataset.get_iter('dev'):
                         stats = self.process_batch(dev_batch, train=False, fout=fout)
                         dev_stats.add(stats)
                 print('DEV @ {}: {}'.format(self.meta.step, dev_stats))
                 dev_stats.log(self.outputter.tb_logger, self.meta.step, 'pn_dev_')
-
-        progress_bar.close()
 
     def test(self):
         test_stats = Stats()
         self.dataset.init_iter('test')
         fout_filename = 'pred.test.{}'.format(self.meta.step)
         with open(self.outputter.get_path(fout_filename), 'w') as fout:
-            for test_batch in tqdm(self.dataset.get_iter('test'), desc='TEST'):
+            for test_batch in self.dataset.get_iter('test'):
                 stats = self.process_batch(test_batch, train=False, fout=fout)
                 test_stats.add(stats)
         print('TEST @ {}: {}'.format(self.meta.step, test_stats))

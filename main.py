@@ -56,6 +56,9 @@ def main():
     print(json.dumps(config, indent=2))
     config = ConfigDict(config)
 
+    if not os.path.isdir(BASEDIR):
+        os.makedirs(BASEDIR)
+
     outputter = Outputter(config, basedir=BASEDIR, force_outdir=args.outdir)
     experiment = Experiment(
         config, outputter, args.load_prefix, args.seed, args.force_cpu
