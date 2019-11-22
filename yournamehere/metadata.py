@@ -1,8 +1,8 @@
-# Metadata contains miscellaneous information for training
-# and for constructing the model
-# (e.g., the vocab should be saved here).
-# Metadata should be lightweight and serializable.
-
+"""Metadata contains miscellaneous information for training and for
+constructing the model (e.g., the vocab should be saved here).
+Metadata should be lightweight and serializable.
+"""
+from __future__ import (absolute_import, division, print_function)
 import pickle
 
 

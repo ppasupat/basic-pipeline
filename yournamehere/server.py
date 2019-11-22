@@ -11,6 +11,7 @@ Requirements:
     (https://bottlepy.org/docs/dev/api.html#bottle.BaseRequest.forms)
   - s_generate_response(q, batch, logit, prediction) --> any
 """
+from __future__ import (absolute_import, division, print_function)
 from bottle import post, request, run
 
 

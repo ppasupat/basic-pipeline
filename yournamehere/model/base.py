@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 import torch
 import torch.nn as nn
 
@@ -5,7 +6,7 @@ import torch.nn as nn
 class Model(nn.Module):
 
     def __init__(self, config, meta):
-        super().__init__()
+        super(Model, self).__init__()
 
     def initialize(self, config, meta):
         """

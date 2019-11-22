@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 from collections import Counter
 
 import numpy as np
@@ -51,7 +52,7 @@ class DemoDataset(Dataset):
     META_KEYS = ['vocab', 'vocab_x', 'labels', 'labels_x']
 
     def __init__(self, config, meta):
-        super().__init__(config, meta)
+        super(DemoDataset, self).__init__(config, meta)
         self._data = {}
         self._iters = {}
         self.meta = meta

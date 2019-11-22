@@ -9,8 +9,8 @@ I just want a plain plastic case that I can put my favorite blades into.
 
 # Dependencies
 
-* Python 3.x
-* [Pytorch 1.0](https://pytorch.org/)
+* Python 3.x (2.7 should also work)
+* [Pytorch 1.x](https://pytorch.org/)
 * (optional) [PyYAML](https://pypi.org/project/PyYAML/)
   * If not installed, only JSON configs can be used.
 * (optional) [tensorboardX](https://pypi.org/project/tensorboardX/)

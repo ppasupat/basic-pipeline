@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -17,7 +18,7 @@ class DemoModel(Model):
     """
 
     def __init__(self, config, meta):
-        super().__init__(config, meta)
+        super(DemoModel, self).__init__(config, meta)
         c_model = config.model
 
         self.token_embedder = nn.Embedding(
